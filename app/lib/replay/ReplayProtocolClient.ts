@@ -1,4 +1,4 @@
-const replayWsServer = "wss://dispatch.replay.io";
+const replayWsServer = process.env["REPLAY_DISPATCH_URL"] || "wss://dispatch.replay.io";
 
 export function assert(condition: any, message: string = "Assertion failed!"): asserts condition {
   if (!condition) {
