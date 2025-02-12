@@ -21,7 +21,7 @@ import { debounce } from '~/utils/debounce';
 import { useSettings } from '~/lib/hooks/useSettings';
 import { useSearchParams } from '@remix-run/react';
 import { createSampler } from '~/utils/sampler';
-import { saveProjectContents } from './Messages.client';
+//import { saveProjectContents } from './Messages.client';
 import { getSimulationRecording, getSimulationEnhancedPrompt, simulationAddData, simulationRepositoryUpdated } from '~/lib/replay/SimulationPrompt';
 import { getIFrameSimulationData } from '~/lib/replay/Recording';
 import { getCurrentIFrame } from '../workbench/Preview';
@@ -184,8 +184,8 @@ export const ChatImpl = memo(
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
-    const [imageDataList, setImageDataList] = useState<string[]>([]); // Move here
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [imageDataList, setImageDataList] = useState<string[]>([]);
     const [searchParams, setSearchParams] = useSearchParams();
     const [injectedMessages, setInjectedMessages] = useState<InjectedMessage[]>([]);
     const [simulationLoading, setSimulationLoading] = useState(false);
@@ -341,7 +341,7 @@ export const ChatImpl = memo(
       const _input = messageInput || input;
       const numAbortsAtStart = gNumAborts;
 
-      if (_input.length === 0 || isLoading) {
+      if (!_input?.trim()) {
         return;
       }
 
@@ -436,7 +436,6 @@ export const ChatImpl = memo(
       setInput('');
       Cookies.remove(PROMPT_COOKIE_KEY);
 
-      // Add file cleanup here
       setUploadedFiles([]);
       setImageDataList([]);
 
@@ -446,9 +445,11 @@ export const ChatImpl = memo(
 
       // The project contents are associated with the last message present when
       // the user message is added.
+      /*
       const lastMessage = messages[messages.length - 1];
       const { contentBase64 } = await workbenchStore.generateZipBase64();
       saveProjectContents(lastMessage.id, { content: contentBase64 });
+      */
     };
 
     /**

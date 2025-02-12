@@ -7,11 +7,6 @@ import { IconButton } from '~/components/ui/IconButton';
 import styles from './Settings.module.scss';
 import APIKeysTab from './providers/APIKeysTab';
 import { useSettings } from '~/lib/hooks/useSettings';
-import FeaturesTab from './features/FeaturesTab';
-import DebugTab from './debug/DebugTab';
-import EventLogsTab from './event-logs/EventLogsTab';
-import ConnectionsTab from './connections/ConnectionsTab';
-import DataTab from './data/DataTab';
 
 interface SettingsProps {
   open: boolean;
@@ -25,30 +20,7 @@ export const SettingsWindow = ({ open, onClose }: SettingsProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('data');
 
   const tabs: { id: TabType; label: string; icon: string; component?: ReactElement }[] = [
-    { id: 'data', label: 'Data', icon: 'i-ph:database', component: <DataTab /> },
     { id: 'apiKeys', label: 'User Info', icon: 'i-ph:key', component: <APIKeysTab /> },
-    { id: 'connection', label: 'Connection', icon: 'i-ph:link', component: <ConnectionsTab /> },
-    { id: 'features', label: 'Features', icon: 'i-ph:star', component: <FeaturesTab /> },
-    ...(debug
-      ? [
-          {
-            id: 'debug' as TabType,
-            label: 'Debug Tab',
-            icon: 'i-ph:bug',
-            component: <DebugTab />,
-          },
-        ]
-      : []),
-    ...(eventLogs
-      ? [
-          {
-            id: 'event-logs' as TabType,
-            label: 'Event Logs',
-            icon: 'i-ph:list-bullets',
-            component: <EventLogsTab />,
-          },
-        ]
-      : []),
   ];
 
   return (

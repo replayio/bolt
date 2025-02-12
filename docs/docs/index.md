@@ -1,7 +1,9 @@
 # Welcome to bolt diy
+
 bolt.diy allows you to choose the LLM that you use for each prompt! Currently, you can use OpenAI, Anthropic, Ollama, OpenRouter, Gemini, LMStudio, Mistral, xAI, HuggingFace, DeepSeek, or Groq models - and it is easily extended to use any other model supported by the Vercel AI SDK! See the instructions below for running this locally and extending it to include more models.
 
 ## Table of Contents
+
 - [Join the community!](#join-the-community)
 - [Features](#features)
 - [Setup](#setup)
@@ -41,31 +43,31 @@ Also [this pinned post in our community](https://thinktank.ottomator.ai/t/videos
 
 ---
 
-## Setup 
+## Setup
 
-If you're new to installing software from GitHub, don't worry! If you encounter any issues, feel free to submit an "issue" using the provided links or improve this documentation by forking the repository, editing the instructions, and submitting a pull request. The following instruction will help you get the stable branch up and running on your local machine in no time.  
+If you're new to installing software from GitHub, don't worry! If you encounter any issues, feel free to submit an "issue" using the provided links or improve this documentation by forking the repository, editing the instructions, and submitting a pull request. The following instruction will help you get the stable branch up and running on your local machine in no time.
 
-### Prerequisites  
+### Prerequisites
 
-1. **Install Git**: [Download Git](https://git-scm.com/downloads)  
-2. **Install Node.js**: [Download Node.js](https://nodejs.org/en/download/)  
+1. **Install Git**: [Download Git](https://git-scm.com/downloads)
+2. **Install Node.js**: [Download Node.js](https://nodejs.org/en/download/)
 
-   - After installation, the Node.js path is usually added to your system automatically. To verify:  
-     - **Windows**: Search for "Edit the system environment variables," click "Environment Variables," and check if `Node.js` is in the `Path` variable.  
-     - **Mac/Linux**: Open a terminal and run:  
-       ```bash  
-       echo $PATH  
-       ```  
-       Look for `/usr/local/bin` in the output.  
+   - After installation, the Node.js path is usually added to your system automatically. To verify:
+     - **Windows**: Search for "Edit the system environment variables," click "Environment Variables," and check if `Node.js` is in the `Path` variable.
+     - **Mac/Linux**: Open a terminal and run:
+       ```bash
+       echo $PATH
+       ```
+       Look for `/usr/local/bin` in the output.
 
 ### Clone the Repository
 
 Alternatively, you can download the latest version of the project directly from the [Releases Page](https://github.com/stackblitz-labs/bolt.diy/releases/latest). Simply download the .zip file, extract it, and proceed with the setup instructions below. If you are comfertiable using git then run the command below.
 
-Clone the repository using Git:  
+Clone the repository using Git:
 
-```bash  
-git clone -b stable https://github.com/stackblitz-labs/bolt.diy  
+```bash
+git clone -b stable https://github.com/stackblitz-labs/bolt.diy
 ```
 
 ---
@@ -76,7 +78,7 @@ There are two ways to configure your API keys in bolt.diy:
 
 #### 1. Set API Keys in the `.env.local` File
 
-When setting up the application, you will need to add your API keys for the LLMs you wish to use. You can do this by renaming the `.env.example` file to `.env.local` and adding your API keys there. 
+When setting up the application, you will need to add your API keys for the LLMs you wish to use. You can do this by renaming the `.env.example` file to `.env.local` and adding your API keys there.
 
 - On **Mac**, you can find the file at `[your name]/bolt.diy/.env.example`.
 - On **Windows/Linux**, the path will be similar.
@@ -112,54 +114,60 @@ This method allows you to easily add or update your keys without needing to modi
 
 Once you've configured your keys, the application will be ready to use the selected LLMs.
 
-
 ---
 
-## Run the Application  
+## Run the Application
 
 ### Option 1: Without Docker
 
-1. **Install Dependencies**:  
-   ```bash  
-   pnpm install  
-   ```  
-   If `pnpm` is not installed, install it using:  
-   ```bash  
-   sudo npm install -g pnpm  
-   ```  
+1. **Install Dependencies**:
 
-2. **Start the Application**:  
-   ```bash  
-   pnpm run dev  
+   ```bash
+   pnpm install
    ```
-   This will start the Remix Vite development server. You will need Google Chrome Canary to run this locally if you use Chrome! It's an easy install and a good browser for web development anyway.  
 
-### Option 2: With Docker  
+   If `pnpm` is not installed, install it using:
 
-#### Prerequisites  
-- Ensure Git, Node.js, and Docker are installed: [Download Docker](https://www.docker.com/)  
+   ```bash
+   sudo npm install -g pnpm
+   ```
 
-#### Steps  
+2. **Start the Application**:
+   ```bash
+   pnpm run dev
+   ```
+   This will start the Remix Vite development server. You will need Google Chrome Canary to run this locally if you use Chrome! It's an easy install and a good browser for web development anyway.
 
-1. **Build the Docker Image**:  
+### Option 2: With Docker
 
-   Use the provided NPM scripts:  
-   ```bash  
-   npm run dockerbuild 
-   ```  
+#### Prerequisites
 
-   Alternatively, use Docker commands directly:  
-   ```bash  
+- Ensure Git, Node.js, and Docker are installed: [Download Docker](https://www.docker.com/)
+
+#### Steps
+
+1. **Build the Docker Image**:
+
+   Use the provided NPM scripts:
+
+   ```bash
+   npm run dockerbuild
+   ```
+
+   Alternatively, use Docker commands directly:
+
+   ```bash
    docker build . --target bolt-ai-development
-   ```  
+   ```
 
 2. **Run the Container**:  
-   Use Docker Compose profiles to manage environments:  
-   ```bash  
-   docker-compose --profile development up 
-   ```  
+   Use Docker Compose profiles to manage environments:
 
-   - With the development profile, changes to your code will automatically reflect in the running container (hot reloading).  
+   ```bash
+   docker compose --profile development up
+   ```
+
+   - With the development profile, changes to your code will automatically reflect in the running container (hot reloading).
 
 ---
 
@@ -167,42 +175,46 @@ Once you've configured your keys, the application will be ready to use the selec
 
 To keep your local version of bolt.diy up to date with the latest changes, follow these steps for your operating system:
 
-#### 1. **Navigate to your project folder**  
-   Navigate to the directory where you cloned the repository and open a terminal:
+#### 1. **Navigate to your project folder**
 
-#### 2. **Fetch the Latest Changes**  
-   Use Git to pull the latest changes from the main repository:
+Navigate to the directory where you cloned the repository and open a terminal:
 
-   ```bash
-   git pull origin main
-   ```
+#### 2. **Fetch the Latest Changes**
 
-#### 3. **Update Dependencies**  
-   After pulling the latest changes, update the project dependencies by running the following command:
+Use Git to pull the latest changes from the main repository:
 
-   ```bash
-   pnpm install
-   ```
+```bash
+git pull origin main
+```
 
-#### 4. **Rebuild and Start the Application**  
+#### 3. **Update Dependencies**
 
-   - **If using Docker**, ensure you rebuild the Docker image to avoid using a cached version:  
-     ```bash  
-     docker-compose --profile development up --build  
-     ```  
+After pulling the latest changes, update the project dependencies by running the following command:
 
-   - **If not using Docker**, you can start the application as usual with:  
-     ```bash  
-     pnpm run dev  
-     ```  
+```bash
+pnpm install
+```
 
-This ensures that you're running the latest version of bolt.diy and can take advantage of all the newest features and bug fixes. 
+#### 4. **Rebuild and Start the Application**
+
+- **If using Docker**, ensure you rebuild the Docker image to avoid using a cached version:
+
+  ```bash
+  docker compose --profile development up --build
+  ```
+
+- **If not using Docker**, you can start the application as usual with:
+  ```bash
+  pnpm run dev
+  ```
+
+This ensures that you're running the latest version of bolt.diy and can take advantage of all the newest features and bug fixes.
 
 ---
 
 ## Adding New LLMs:
 
-To make new LLMs available to use in this version of bolt.diy, head on over to `app/utils/constants.ts` and find the constant MODEL_LIST. Each element in this array is an object that has the model ID for the name (get this from the provider's API documentation), a label for the frontend model dropdown, and the provider. 
+To make new LLMs available to use in this version of bolt.diy, head on over to `app/utils/constants.ts` and find the constant MODEL_LIST. Each element in this array is an object that has the model ID for the name (get this from the provider's API documentation), a label for the frontend model dropdown, and the provider.
 
 By default, Anthropic, OpenAI, Groq, and Ollama are implemented as providers, but the YouTube video for this repo covers how to extend this to work with more providers if you wish!
 

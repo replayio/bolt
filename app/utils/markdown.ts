@@ -54,14 +54,40 @@ export const allowedHTMLElements = [
   'tr',
   'ul',
   'var',
+  'think',
 ];
+
+// Add custom rehype plugin
+function remarkThinkRawContent() {
+  return (tree: any) => {
+    visit(tree, (node: any) => {
+      if (node.type === 'html' && node.value && node.value.startsWith('<think>')) {
+        const cleanedContent = node.value.slice(7);
+        node.value = `<div class="__boltThought__">${cleanedContent}`;
+
+        return;
+      }
+
+      if (node.type === 'html' && node.value && node.value.startsWith('</think>')) {
+        const cleanedContent = node.value.slice(8);
+        node.value = `</div>${cleanedContent}`;
+      }
+    });
+  };
+}
 
 const rehypeSanitizeOptions: RehypeSanitizeOptions = {
   ...defaultSchema,
   tagNames: allowedHTMLElements,
   attributes: {
     ...defaultSchema.attributes,
-    div: [...(defaultSchema.attributes?.div ?? []), 'data*', ['className', '__boltArtifact__']],
+    div: [
+      ...(defaultSchema.attributes?.div ?? []),
+      'data*',
+      ['className', '__boltArtifact__', '__boltThought__'],
+
+      // ['className', '__boltThought__']
+    ],
   },
   strip: [],
 };
@@ -72,6 +98,8 @@ export function remarkPlugins(limitedMarkdown: boolean) {
   if (limitedMarkdown) {
     plugins.unshift(limitedMarkdownPlugin);
   }
+
+  plugins.unshift(remarkThinkRawContent);
 
   return plugins;
 }

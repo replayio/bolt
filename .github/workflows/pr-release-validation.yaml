@@ -9,10 +9,10 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Validate PR Labels
         run: |
           if [[ "${{ contains(github.event.pull_request.labels.*.name, 'stable-release') }}" == "true" ]]; then

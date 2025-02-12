@@ -1,6 +1,10 @@
 import { useStore } from '@nanostores/react';
 import { useEffect } from 'react';
 import { shortcutsStore, type Shortcuts } from '~/lib/stores/settings';
+import { isMac } from '~/utils/os';
+
+// List of keys that should not trigger shortcuts when typing in input/textarea
+const INPUT_ELEMENTS = ['input', 'textarea'];
 
 class ShortcutEventEmitter {
   #emitter = new EventTarget();
@@ -25,26 +29,56 @@ export function useShortcuts(): void {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
-      const { key, ctrlKey, shiftKey, altKey, metaKey } = event;
+      // Don't trigger shortcuts when typing in input fields
+      if (
+        document.activeElement &&
+        INPUT_ELEMENTS.includes(document.activeElement.tagName.toLowerCase()) &&
+        !event.altKey && // Allow Alt combinations even in input fields
+        !event.metaKey && // Allow Cmd/Win combinations even in input fields
+        !event.ctrlKey // Allow Ctrl combinations even in input fields
+      ) {
+        return;
+      }
 
-      for (const name in shortcuts) {
-        const shortcut = shortcuts[name as keyof Shortcuts];
+      // Debug logging in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Key pressed:', {
+          key: event.key,
+          code: event.code,
+          ctrlKey: event.ctrlKey,
+          shiftKey: event.shiftKey,
+          altKey: event.altKey,
+          metaKey: event.metaKey,
+          target: event.target,
+        });
+      }
 
-        if (
-          shortcut.key.toLowerCase() === key.toLowerCase() &&
-          (shortcut.ctrlOrMetaKey
-            ? ctrlKey || metaKey
-            : (shortcut.ctrlKey === undefined || shortcut.ctrlKey === ctrlKey) &&
-              (shortcut.metaKey === undefined || shortcut.metaKey === metaKey)) &&
-          (shortcut.shiftKey === undefined || shortcut.shiftKey === shiftKey) &&
-          (shortcut.altKey === undefined || shortcut.altKey === altKey)
-        ) {
+      // Handle shortcuts
+      for (const [name, shortcut] of Object.entries(shortcuts)) {
+        const keyMatches =
+          shortcut.key.toLowerCase() === event.key.toLowerCase() || `Key${shortcut.key.toUpperCase()}` === event.code;
+
+        // Handle ctrlOrMetaKey based on OS
+        const ctrlOrMetaKeyMatches = shortcut.ctrlOrMetaKey
+          ? (isMac && event.metaKey) || (!isMac && event.ctrlKey)
+          : true;
+
+        const modifiersMatch =
+          ctrlOrMetaKeyMatches &&
+          (shortcut.ctrlKey === undefined || shortcut.ctrlKey === event.ctrlKey) &&
+          (shortcut.metaKey === undefined || shortcut.metaKey === event.metaKey) &&
+          (shortcut.shiftKey === undefined || shortcut.shiftKey === event.shiftKey) &&
+          (shortcut.altKey === undefined || shortcut.altKey === event.altKey);
+
+        if (keyMatches && modifiersMatch) {
+          // Prevent default browser behavior if specified
+          if (shortcut.isPreventDefault) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+
           shortcutEventEmitter.dispatch(name as keyof Shortcuts);
-          event.preventDefault();
-          event.stopPropagation();
-
           shortcut.action();
-
           break;
         }
       }

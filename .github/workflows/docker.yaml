@@ -8,7 +8,7 @@ on:
       - main
     tags:
       - v*
-      - "*"
+      - '*'
 
 permissions:
   packages: write
@@ -57,7 +57,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }} # ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.GITHUB_TOKEN }} # ${{ secrets.DOCKER_PASSWORD }} 
+          password: ${{ secrets.GITHUB_TOKEN }} # ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push
         uses: docker/build-push-action@v6

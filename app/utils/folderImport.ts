@@ -67,6 +67,11 @@ export const createChatFromFolder = async (
   const messages = [userMessage, filesMessage];
 
   if (commandsMessage) {
+    messages.push({
+      role: 'user',
+      id: generateId(),
+      content: 'Setup the codebase and Start the application',
+    });
     messages.push(commandsMessage);
   }
 

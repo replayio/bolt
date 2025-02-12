@@ -33,7 +33,7 @@ theme:
   # favicon: assets/logo.png
 repo_name: bolt.diy
 repo_url: https://github.com/stackblitz-labs/bolt.diy
-edit_uri: ""
+edit_uri: ''
 
 extra:
   generator: false
@@ -50,9 +50,6 @@ extra:
     - icon: fontawesome/brands/bluesky
       link: https://bsky.app/profile/bolt.diy
       name: bolt.diy on Bluesky
-
-      
-
 
 markdown_extensions:
   - pymdownx.highlight:

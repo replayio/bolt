@@ -19,5 +19,5 @@ Usual values: Software Developers using the IDE | Contributors -->
 
 # Capabilities
 
-<!-- which existing capabilities or future features can be imagined that belong to this epic? This list serves as illustration to sketch the boundaries of this epic. 
+<!-- which existing capabilities or future features can be imagined that belong to this epic? This list serves as illustration to sketch the boundaries of this epic.
 Once features are actually being planned / described in detail, they can be linked here. -->

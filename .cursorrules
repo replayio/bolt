@@ -1,0 +1,157 @@
+# Project Overview
+
+bolt.diy (previously oTToDev) is an open-source AI-powered full-stack web development platform that allows users to choose different LLM providers for coding assistance. The project supports multiple AI providers including OpenAI, Anthropic, Ollama, OpenRouter, Gemini, LMStudio, Mistral, xAI, HuggingFace, DeepSeek, and Groq.
+
+# Personality
+
+- Professional and technically precise
+- Focus on best practices and clean code
+- Provide clear explanations for code changes
+- Maintain consistent code style with the existing codebase
+
+# Techstack
+
+- Framework: Remix
+- Runtime: Node.js (>=18.18.0)
+- Package Manager: pnpm
+- UI: React with TypeScript
+- Styling: UnoCSS
+- Development Environment: Vite
+- Testing: Vitest
+- Deployment: Cloudflare Pages
+- Containerization: Docker
+- Code Quality: ESLint, Prettier, TypeScript
+
+# our .env file
+
+- Follow .env.example for required environment variables
+- Keep API keys and sensitive data in .env.local
+- Never commit .env files (they are gitignored)
+
+# Error Fixing Process
+
+1. Identify the root cause through error messages and logs
+2. Check relevant components and dependencies
+3. Verify type safety and TypeScript compliance
+4. Test changes locally before committing
+5. Follow existing error handling patterns
+
+# Our Codebase
+
+- Main application code in /app directory
+- Components follow a modular structure
+- Server-side code in app/lib/.server
+- Client-side utilities in app/lib/
+- Type definitions in types/ directory
+- Documentation in docs/ directory
+
+# Current File Structure
+
+- /app - Main application code
+- /docs - Documentation
+- /functions - Serverless functions
+- /public - Static assets
+- /scripts - Build and utility scripts
+- /types - TypeScript definitions
+- /icons - SVG icons and assets
+
+# github upload process
+
+1. Follow conventional commit messages
+2. Run linting and tests before committing
+3. Create feature branches for new work
+4. Submit PRs with clear descriptions
+5. Ensure CI/CD checks pass
+
+# Important
+
+- Keep dependencies updated
+- Follow TypeScript strict mode
+- Maintain backward compatibility
+- Document API changes
+- Test cross-browser compatibility
+
+# comments
+
+- Use JSDoc for function documentation
+- Keep comments clear and concise
+- Document complex logic and business rules
+- Update comments when changing code
+- Remove redundant comments
+- Always write comments that are relevant to the code they describe
+- Ensure comments explain the "why" not just the "what"
+
+# code review
+
+- Check for type safety
+- Verify error handling
+- Ensure code follows project patterns
+- Look for performance implications
+- Validate accessibility standards
+
+# code writing
+
+- Follow TypeScript best practices
+- Use functional components for React
+- Implement proper error boundaries
+- Write testable code
+- Follow the DRY principle
+
+# code refactoring
+
+- Maintain backward compatibility
+- Update tests alongside changes
+- Document breaking changes
+- Follow the project's type system
+- Keep components modular and reusable
+
+# Development Process
+
+- Write 3 reasoning paragraphs before implementing solutions
+- Analyze the problem space thoroughly before jumping to conclusions
+- Consider all edge cases and potential impacts
+- Process tasks with a Senior Developer mindset
+- Continue working until the solution is complete and verified
+- Remember and consider the full commit/change history when working
+
+# Code Quality Guidelines
+
+- Fewer lines of code is better, but not at the expense of readability
+- Preserve existing comments and documentation
+- Add meaningful comments explaining complex logic or business rules
+- Follow the principle of "Clean Code, Clear Intent"
+- Balance between conciseness and maintainability
+- Think twice, code once - avoid premature optimization
+- Never add comments just for the sake of commenting - ensure they add value
+
+# Problem Solving Approach
+
+1. Understand the context fully before making changes
+2. Document your reasoning and assumptions
+3. Consider alternative approaches and their trade-offs
+4. Validate your solution against existing patterns
+5. Test thoroughly before considering work complete
+6. Review impact on related components
+
+# UI GUIDELINES
+
+- Use consistent colors and typography
+- Ensure UI is responsive and accessible
+- Provide clear feedback for user actions
+- Use meaningful icons and labels
+- Keep UI clean and organized
+- Use consistent spacing and alignment
+- Use consistent naming conventions for components and variables
+- Use consistent file and folder structure
+- Use consistent naming conventions for components and variables
+- Use consistent file and folder structure
+
+# Style Guide
+
+- Use consistent naming conventions for components and variables
+- Use consistent file and folder structure
+- Respect the Light/Dark mode
+- Don't use white background for dark mode
+- Don't use white text on white background for dark mode
+- Match the style of the existing codebase
+- Use consistent naming conventions for components and variables

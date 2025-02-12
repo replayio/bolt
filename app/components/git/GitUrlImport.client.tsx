@@ -7,7 +7,7 @@ import { BaseChat } from '~/components/chat/BaseChat';
 import { Chat } from '~/components/chat/Chat.client';
 import { useGit } from '~/lib/hooks/useGit';
 import { useChatHistory } from '~/lib/persistence';
-import { createCommandsMessage, detectProjectCommands } from '~/utils/projectCommands';
+import { createCommandsMessage, detectProjectCommands, escapeBoltTags } from '~/utils/projectCommands';
 import { LoadingOverlay } from '~/components/ui/LoadingOverlay';
 import { toast } from 'react-toastify';
 
@@ -50,6 +50,8 @@ export function GitUrlImport() {
     if (repoUrl) {
       const ig = ignore().add(IGNORE_PATTERNS);
 
+      throw new Error("NYI");
+      /*
       try {
         const { workdir, data } = await gitClone(repoUrl);
 
@@ -74,12 +76,12 @@ export function GitUrlImport() {
           const filesMessage: Message = {
             role: 'assistant',
             content: `Cloning the repo ${repoUrl} into ${workdir}
-<boltArtifact id="imported-files" title="Git Cloned Files" type="bundled">
+<boltArtifact id="imported-files" title="Git Cloned Files"  type="bundled">
 ${fileContents
   .map(
     (file) =>
       `<boltAction type="file" filePath="${file.path}">
-${file.content}
+${escapeBoltTags(file.content)}
 </boltAction>`,
   )
   .join('\n')}
@@ -91,10 +93,15 @@ ${file.content}
           const messages = [filesMessage];
 
           if (commandsMessage) {
+            messages.push({
+              role: 'user',
+              id: generateId(),
+              content: 'Setup the codebase and Start the application',
+            });
             messages.push(commandsMessage);
           }
 
-          await importChat(`Git Project:${repoUrl.split('/').slice(-1)[0]}`, messages);
+          await importChat(`Git Project:${repoUrl.split('/').slice(-1)[0]}`, messages, { gitUrl: repoUrl });
         }
       } catch (error) {
         console.error('Error during import:', error);
@@ -104,6 +111,7 @@ ${file.content}
 
         return;
       }
+      */
     }
   };
 

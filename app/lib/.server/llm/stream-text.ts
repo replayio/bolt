@@ -4,7 +4,6 @@ import { getSystemPrompt } from '~/lib/common/prompts/prompts';
 import {
   DEFAULT_MODEL,
   DEFAULT_PROVIDER,
-  getModelList,
   MODEL_REGEX,
   MODIFICATIONS_TAG_NAME,
   PROVIDER_LIST,
@@ -156,14 +155,9 @@ export async function getStreamTextArguments(props: {
 
   let currentModel = DEFAULT_MODEL;
   let currentProvider = DEFAULT_PROVIDER.name;
-  const MODEL_LIST = await getModelList({ apiKeys, providerSettings, serverEnv: serverEnv as any });
   const processedMessages = messages.map((message) => {
     if (message.role === 'user') {
       const { model, provider, content } = extractPropertiesFromMessage(message);
-
-      if (MODEL_LIST.find((m) => m.name === model)) {
-        currentModel = model;
-      }
 
       currentProvider = provider;
 
@@ -178,10 +172,6 @@ export async function getStreamTextArguments(props: {
 
     return message;
   });
-
-  const modelDetails = MODEL_LIST.find((m) => m.name === currentModel);
-
-  const dynamicMaxTokens = modelDetails && modelDetails.maxTokenAllowed ? modelDetails.maxTokenAllowed : MAX_TOKENS;
 
   let systemPrompt =
     PromptLibrary.getPropmtFromLibrary(promptId || 'default', {
@@ -203,7 +193,6 @@ export async function getStreamTextArguments(props: {
     currentModel,
     currentProvider,
     system: systemPrompt,
-    maxTokens: dynamicMaxTokens,
     messages: coreMessages,
   };
 }

@@ -7,12 +7,12 @@ on:
 
 permissions:
   contents: write
-  
+
 jobs:
   prepare-release:
     if: contains(github.event.head_commit.message, '#release')
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -80,7 +80,6 @@ jobs:
           NEW_VERSION=${{ steps.bump_version.outputs.new_version }}
           pnpm version $NEW_VERSION --no-git-tag-version --allow-same-version
 
-      
       - name: Prepare changelog script
         run: chmod +x .github/scripts/generate-changelog.sh
 
@@ -89,14 +88,14 @@ jobs:
         env:
           NEW_VERSION: ${{ steps.bump_version.outputs.new_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
         run: .github/scripts/generate-changelog.sh
 
       - name: Get the latest commit hash and version tag
         run: |
           echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
           echo "NEW_VERSION=${{ steps.bump_version.outputs.new_version }}" >> $GITHUB_ENV
-          
+
       - name: Commit and Tag Release
         run: |
           git pull

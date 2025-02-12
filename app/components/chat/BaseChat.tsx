@@ -2,13 +2,14 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import type { Message } from 'ai';
+import type { JSONValue, Message } from 'ai';
 import React, { type RefCallback, useEffect, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
+import { PROVIDER_LIST } from '~/utils/constants';
 import { Messages } from './Messages.client';
 import { SendButton } from './SendButton.client';
 import { APIKeyManager } from './APIKeyManager';
@@ -24,8 +25,15 @@ import GitCloneButton from './GitCloneButton';
 import FilePreview from './FilePreview';
 import { ModelSelector } from '~/components/chat/ModelSelector';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
+import type { ProviderInfo } from '~/types/model';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
 import { toast } from 'react-toastify';
+import StarterTemplates from './StarterTemplates';
+import type { ActionAlert } from '~/types/actions';
+import ChatAlert from './ChatAlert';
+import type { ModelInfo } from '~/lib/modules/llm/types';
+import ProgressCompilation from './ProgressCompilation';
+import type { ProgressAnnotation } from '~/types/context';
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -51,6 +59,9 @@ interface BaseChatProps {
   setUploadedFiles?: (files: File[]) => void;
   imageDataList?: string[];
   setImageDataList?: (dataList: string[]) => void;
+  actionAlert?: ActionAlert;
+  clearAlert?: () => void;
+  data?: JSONValue[] | undefined;
 }
 
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
@@ -77,14 +88,28 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       imageDataList = [],
       setImageDataList,
       messages,
+      actionAlert,
+      clearAlert,
+      data,
     },
     ref,
   ) => {
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
+    const [modelList, setModelList] = useState<ModelInfo[]>([]);
+    const [isModelSettingsCollapsed, setIsModelSettingsCollapsed] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
     const [transcript, setTranscript] = useState('');
-
+    const [isModelLoading, setIsModelLoading] = useState<string | undefined>('all');
+    const [progressAnnotations, setProgressAnnotations] = useState<ProgressAnnotation[]>([]);
+    useEffect(() => {
+      if (data) {
+        const progressList = data.filter(
+          (x) => typeof x === 'object' && (x as any).type === 'progress',
+        ) as ProgressAnnotation[];
+        setProgressAnnotations(progressList);
+      }
+    }, [data]);
     useEffect(() => {
       console.log(transcript);
     }, [transcript]);
@@ -216,7 +241,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         data-chat-visible={showChat}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
-        <div ref={scrollRef} className="flex flex-col lg:flex-row overflow-y-auto w-full h-full">
+        <div className="flex flex-col lg:flex-row overflow-y-auto w-full h-full">
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
               <div id="intro" className="mt-[16vh] max-w-chat mx-auto text-center px-4 lg:px-0">
@@ -230,73 +255,41 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             )}
             <div
               className={classNames('pt-6 px-2 sm:px-6', {
-                'h-full flex flex-col': chatStarted,
+                'h-full flex flex-col pb-4 overflow-y-auto': chatStarted,
               })}
+              ref={scrollRef}
             >
               <ClientOnly>
                 {() => {
                   return chatStarted ? (
-                    <Messages
-                      ref={messageRef}
-                      className="flex flex-col w-full flex-1 max-w-chat pb-6 mx-auto z-1"
-                      messages={messages}
-                      isStreaming={isStreaming}
-                    />
+                    <div className="flex-1 w-full max-w-chat pb-6 mx-auto z-1">
+                      <Messages
+                        ref={messageRef}
+                        className="flex flex-col "
+                        messages={messages}
+                        isStreaming={isStreaming}
+                      />
+                    </div>
                   ) : null;
                 }}
               </ClientOnly>
               <div
-                className={classNames(
-                  'bg-bolt-elements-background-depth-2 p-3 rounded-lg border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt mb-6',
-                  {
-                    'sticky bottom-2': chatStarted,
-                  },
-                )}
+                className={classNames('flex flex-col gap-4 w-full max-w-chat mx-auto z-prompt', {
+                  'sticky bottom-2': chatStarted,
+                  'position-absolute': chatStarted,
+                })}
               >
-                <svg className={classNames(styles.PromptEffectContainer)}>
-                  <defs>
-                    <linearGradient
-                      id="line-gradient"
-                      x1="20%"
-                      y1="0%"
-                      x2="-14%"
-                      y2="10%"
-                      gradientUnits="userSpaceOnUse"
-                      gradientTransform="rotate(-45)"
-                    >
-                      <stop offset="0%" stopColor="#b44aff" stopOpacity="0%"></stop>
-                      <stop offset="40%" stopColor="#b44aff" stopOpacity="80%"></stop>
-                      <stop offset="50%" stopColor="#b44aff" stopOpacity="80%"></stop>
-                      <stop offset="100%" stopColor="#b44aff" stopOpacity="0%"></stop>
-                    </linearGradient>
-                    <linearGradient id="shine-gradient">
-                      <stop offset="0%" stopColor="white" stopOpacity="0%"></stop>
-                      <stop offset="40%" stopColor="#ffffff" stopOpacity="80%"></stop>
-                      <stop offset="50%" stopColor="#ffffff" stopOpacity="80%"></stop>
-                      <stop offset="100%" stopColor="white" stopOpacity="0%"></stop>
-                    </linearGradient>
-                  </defs>
-                  <rect className={classNames(styles.PromptEffectLine)} pathLength="100" strokeLinecap="round"></rect>
-                  <rect className={classNames(styles.PromptShine)} x="48" y="24" width="70" height="1"></rect>
-                </svg>
-                <FilePreview
-                  files={uploadedFiles}
-                  imageDataList={imageDataList}
-                  onRemove={(index) => {
-                    setUploadedFiles?.(uploadedFiles.filter((_, i) => i !== index));
-                    setImageDataList?.(imageDataList.filter((_, i) => i !== index));
-                  }}
-                />
-                <ClientOnly>
-                  {() => (
-                    <ScreenshotStateManager
-                      setUploadedFiles={setUploadedFiles}
-                      setImageDataList={setImageDataList}
-                      uploadedFiles={uploadedFiles}
-                      imageDataList={imageDataList}
-                    />
-                  )}
-                </ClientOnly>
+                {actionAlert && (
+                  <ChatAlert
+                    alert={actionAlert}
+                    clearAlert={() => clearAlert?.()}
+                    postMessage={(message) => {
+                      sendMessage?.({} as any, message);
+                      clearAlert?.();
+                    }}
+                  />
+                )}
+                {progressAnnotations && <ProgressCompilation data={progressAnnotations} />}
                 <div
                   className={classNames(
                     'relative shadow-xs border border-bolt-elements-borderColor backdrop-blur rounded-lg',
@@ -429,20 +422,25 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </div>
             </div>
             {!chatStarted && (
-              <div className="flex justify-center gap-2">
-                {ImportButtons(importChat)}
-                <GitCloneButton importChat={importChat} />
+              <div className="flex flex-col justify-center mt-6 gap-5">
+                <div className="flex justify-center gap-2">
+                  <div className="flex items-center gap-2">
+                    {ImportButtons(importChat)}
+                    <GitCloneButton importChat={importChat} className="min-w-[120px]" />
+                  </div>
+                </div>
+
+                {ExamplePrompts((event, messageInput) => {
+                  if (isStreaming) {
+                    handleStop?.();
+                    return;
+                  }
+
+                  handleSendMessage?.(event, messageInput);
+                })}
+                <StarterTemplates />
               </div>
             )}
-            {!chatStarted &&
-              ExamplePrompts((event, messageInput) => {
-                if (isStreaming) {
-                  handleStop?.();
-                  return;
-                }
-
-                handleSendMessage?.(event, messageInput);
-              })}
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />}</ClientOnly>
         </div>

@@ -13,13 +13,13 @@ assignees: ''
 
 # Scope
 
-<!-- This is kind-of the definition-of-done for a feature. 
+<!-- This is kind-of the definition-of-done for a feature.
 Try to keep the scope as small as possible and prefer creating multiple, small features which each solve a single problem / make something better
 -->
 
 # Options
- 
-<!-- If you already have an idea how this can be implemented, please describe it here. 
+
+<!-- If you already have an idea how this can be implemented, please describe it here.
 This allows potential other contributors to join forces and provide meaningful feedback prio to even starting work on it.
 -->
 
