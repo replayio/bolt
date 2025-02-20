@@ -6,8 +6,7 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { cssTransition, ToastContainer } from 'react-toastify';
 import { useEffect } from 'react';
 import { useState } from 'react';
-import { BoltProblemStatus, listAllProblems } from '~/lib/replay/Problems';
-import type { BoltProblemDescription } from '~/lib/replay/Problems';
+import { type Problem, type ProblemComment, type ProblemStatus, listAllProblems, getProblemsUsername } from '~/lib/supabase/problems';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -44,15 +43,15 @@ export function ToastContainerWrapper() {
   />
 }
 
-export function Status({ status }: { status: BoltProblemStatus | undefined }) {
+export function Status({ status }: { status: ProblemStatus | undefined }) {
   if (!status) {
-    status = BoltProblemStatus.Pending;
+    status = 'pending';
   }
 
-  const statusColors: Record<BoltProblemStatus, string> = {
-    [BoltProblemStatus.Pending]: 'bg-yellow-400',
-    [BoltProblemStatus.Unsolved]: 'bg-orange-500',
-    [BoltProblemStatus.Solved]: 'bg-blue-500'
+  const statusColors: Record<ProblemStatus, string> = {
+    pending: 'bg-yellow-400',
+    unsolved: 'bg-orange-500',
+    solved: 'bg-blue-500',
   };
 
   return (
@@ -87,20 +86,16 @@ export function Keywords({ keywords }: { keywords: string[] | undefined }) {
   );
 }
 
-function getProblemStatus(problem: BoltProblemDescription): BoltProblemStatus {
-  return problem.status ?? BoltProblemStatus.Pending;
-}
-
 function ProblemsPage() {
-  const [problems, setProblems] = useState<BoltProblemDescription[] | null>(null);
-  const [statusFilter, setStatusFilter] = useState<BoltProblemStatus | 'all'>(BoltProblemStatus.Solved);
+  const [problems, setProblems] = useState<Problem[] | null>(null);
+  const [statusFilter, setStatusFilter] = useState<ProblemStatus | 'all'>('solved');
 
   useEffect(() => {
     listAllProblems().then(setProblems);
   }, []);
 
-  const filteredProblems = problems?.filter(problem => {
-    return statusFilter === 'all' || getProblemStatus(problem) === statusFilter;
+  const filteredProblems = problems?.filter((problem) => {
+    return statusFilter === 'all' || problem.status === statusFilter;
   });
 
   return (
@@ -114,7 +109,7 @@ function ProblemsPage() {
           {problems && <div className="mb-4">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as BoltProblemStatus | 'all')}
+              onChange={(e) => setStatusFilter(e.target.value as ProblemStatus | 'all')}
               className="appearance-none w-48 px-4 py-2.5 rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-border text-bolt-content-primary hover:border-bolt-elements-border-hover focus:outline-none focus:ring-2 focus:ring-bolt-accent-primary/20 focus:border-bolt-accent-primary cursor-pointer relative pr-10"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
@@ -124,8 +119,8 @@ function ProblemsPage() {
               }}
             >
               <option value="all">{`All Problems (${problems?.length ?? 0})`}</option>
-              {Object.values(BoltProblemStatus).map((status) => {
-                const count = problems?.filter(problem => getProblemStatus(problem) === status).length ?? 0;
+              {(['pending', 'solved', 'unsolved'] as const).map((status) => {
+                const count = problems?.filter((problem) => problem.status === status).length ?? 0;
                 return (
                   <option key={status} value={status}>
                     {status.charAt(0).toUpperCase() + status.slice(1) + ` (${count})`}
@@ -145,8 +140,8 @@ function ProblemsPage() {
             <div className="grid gap-4">
               {filteredProblems?.map((problem) => (
                 <a
-                  href={`/problem/${problem.problemId}`}
-                  key={problem.problemId}
+                  href={`/problem/${problem.id}`}
+                  key={problem.id}
                   className="p-4 rounded-lg bg-bolt-elements-background-depth-2 hover:bg-bolt-elements-background-depth-3 transition-colors cursor-pointer"
                 >
                   <h2 className="text-xl font-semibold mb-2">{problem.title}</h2>
@@ -154,7 +149,7 @@ function ProblemsPage() {
                   <Status status={problem.status} />
                   <Keywords keywords={problem.keywords} />
                   <p className="text-sm text-gray-600">
-                    Time: {new Date(problem.timestamp).toLocaleString()}
+                    Time: {new Date(problem.created_at).toLocaleString()}
                   </p>
                 </a>
               ))}

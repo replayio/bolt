@@ -1,7 +1,11 @@
 #!/bin/bash
 
-bindings=""
+# Read from .env.local file
+if [ -f .env.local ]; then
+  source .env.local
+fi
 
+bindings=""
 while IFS= read -r line || [ -n "$line" ]; do
   if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]]; then
     name=$(echo "$line" | cut -d '=' -f 1)
@@ -13,4 +17,4 @@ done < .env.local
 
 bindings=$(echo $bindings | sed 's/[[:space:]]*$//')
 
-echo $bindings
+echo "$bindings --binding SUPABASE_URL=$SUPABASE_URL --binding SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"

@@ -1,5 +1,6 @@
 import { useStore } from '@nanostores/react';
-import type { LinksFunction } from '@remix-run/cloudflare';
+import type { LinksFunction, LoaderFunction } from '@remix-run/cloudflare';
+import { json } from '@remix-run/cloudflare';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
@@ -37,6 +38,15 @@ export const links: LinksFunction = () => [
     href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
   },
 ];
+
+export const loader: LoaderFunction = async ({ context }) => {
+  return json({
+    ENV: {
+      SUPABASE_URL: context.SUPABASE_URL,
+      SUPABASE_ANON_KEY: context.SUPABASE_ANON_KEY,
+    },
+  });
+};
 
 const inlineThemeCode = stripIndents`
   setTutorialKitTheme();

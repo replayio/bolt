@@ -8,18 +8,25 @@ import { toast } from 'react-toastify';
 import { useCallback, useEffect } from 'react';
 import { useState } from 'react';
 import { useParams } from '@remix-run/react';
-import { getProblem, updateProblem as backendUpdateProblem, getProblemsUsername, BoltProblemStatus, hasNutAdminKey } from '~/lib/replay/Problems';
-import type { BoltProblem, BoltProblemComment, BoltProblemInput } from '~/lib/replay/Problems';
+import {
+  type Problem,
+  type ProblemComment,
+  getProblem,
+  updateProblem as backendUpdateProblem,
+  getProblemsUsername,
+  hasNutAdminKey,
+  addProblemComment,
+} from '~/lib/supabase/problems';
 
-function Comments({ comments }: { comments: BoltProblemComment[] }) {
+function Comments({ comments }: { comments: ProblemComment[] }) {
   return (
     <div className="comments">
-      {comments.map((comment, index) => (
-        <div key={index} className="comment">
+      {comments.map((comment) => (
+        <div key={comment.id} className="comment">
           <div className="comment-header">
-            <span className="comment-username">{comment.username ?? ""}</span>
+            <span className="comment-username">{comment.username}</span>
             <span className="comment-date">
-              {new Date(comment.timestamp).toLocaleString()}
+              {new Date(comment.created_at).toLocaleString()}
             </span>
           </div>
           <div className="comment-text">{comment.content}</div>
@@ -29,24 +36,24 @@ function Comments({ comments }: { comments: BoltProblemComment[] }) {
   );
 }
 
-function ProblemViewer({ problem }: { problem: BoltProblem }) {
-  const { problemId, title, description, status = BoltProblemStatus.Pending, keywords = [], comments = [] } = problem;
+function ProblemViewer({ problem }: { problem: Problem }) {
+  const { id, title, description, status = 'pending', keywords = [], problem_comments = [] } = problem;
 
   return (
     <div className="benchmark">
       <h1 className="text-xl4 font-semibold mb-2">{title}</h1>
       <p>{description}</p>
       <a 
-        href={`/load-problem/${problemId}`} 
+        href={`/load-problem/${id}`} 
         className="load-button inline-block px-4 py-2 mt-3 mb-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200 font-medium"
       >
         Load Problem
       </a>
       <Status status={status} />
       <Keywords keywords={keywords} />
-      <Comments comments={comments} />
+      <Comments comments={problem_comments} />
     </div>
-  )
+  );
 }
 
 interface UpdateProblemFormProps {
@@ -60,12 +67,12 @@ function UpdateProblemForm(props: UpdateProblemFormProps) {
   const [value, setValue] = useState("");
 
   const onSubmitClicked = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     if (value.trim()) {
-      handleSubmit(value)
-      setValue('')
+      handleSubmit(value);
+      setValue('');
     }
-  }
+  };
 
   return (
     <form onSubmit={onSubmitClicked} className="mb-6 p-4 bg-bolt-elements-background-depth-2 rounded-lg">
@@ -85,61 +92,45 @@ function UpdateProblemForm(props: UpdateProblemFormProps) {
         {updateText}
       </button>
     </form>
-  )
+  );
 }
 
-type DoUpdateCallback = (problem: BoltProblem) => BoltProblem;
+type DoUpdateCallback = (problem: Problem) => Partial<Problem>;
 type UpdateProblemCallback = (doUpdate: DoUpdateCallback) => void;
 
 function UpdateProblemForms({ updateProblem }: { updateProblem: UpdateProblemCallback }) {
-  const handleAddComment = (content: string) => {
-    const newComment: BoltProblemComment = {
-      timestamp: Date.now(),
-      username: getProblemsUsername(),
+  const params = useParams();
+  const problemId = params.id;
+  if (!problemId) return null;
+
+  const handleAddComment = async (content: string) => {
+    await addProblemComment({
+      problem_id: problemId,
       content,
-    }
-    updateProblem(problem => {
-      const comments = [...(problem.comments || []), newComment];
-      return {
-        ...problem,
-        comments,
-      };
+      username: getProblemsUsername(),
     });
-  }
+  };
 
   const handleSetTitle = (title: string) => {
-    updateProblem(problem => ({
-      ...problem,
-      title,
-    }));
-  }
+    updateProblem(() => ({ title }));
+  };
 
   const handleSetDescription = (description: string) => {
-    updateProblem(problem => ({
-      ...problem,
-      description,
-    }));
-  }
+    updateProblem(() => ({ description }));
+  };
 
   const handleSetStatus = (status: string) => {
-    const statusEnum = BoltProblemStatus[status as keyof typeof BoltProblemStatus];
-    if (!statusEnum) {
+    if (!['pending', 'solved', 'unsolved'].includes(status)) {
       toast.error('Invalid status');
       return;
     }
-    updateProblem(problem => ({
-      ...problem,
-      status: statusEnum,
-    }));
-  }
+    updateProblem(() => ({ status: status as Problem['status'] }));
+  };
 
   const handleSetKeywords = (keywordString: string) => {
     const keywords = keywordString.split(' ').map(keyword => keyword.trim()).filter(keyword => keyword.length > 0);
-    updateProblem(problem => ({
-      ...problem,
-      keywords,
-    }));
-  }
+    updateProblem(() => ({ keywords }));
+  };
 
   return (
     <>
@@ -149,7 +140,7 @@ function UpdateProblemForms({ updateProblem }: { updateProblem: UpdateProblemCal
       <UpdateProblemForm handleSubmit={handleSetStatus} updateText="Set Status" placeholder="Set the status of the problem..." />
       <UpdateProblemForm handleSubmit={handleSetKeywords} updateText="Set Keywords" placeholder="Set the keywords of the problem..." />
     </>
-  )
+  );
 }
 
 function ViewProblemPage() {
@@ -159,21 +150,29 @@ function ViewProblemPage() {
     throw new Error('Problem ID is required');
   }
 
-  const [problemData, setProblemData] = useState<BoltProblem | null>(null);
+  const [problemData, setProblemData] = useState<Problem | null>(null);
 
   const updateProblem = useCallback(async (callback: DoUpdateCallback) => {
     if (!problemData) {
       toast.error('Problem data missing');
       return;
     }
-    const newProblem = callback(problemData);
-    setProblemData(newProblem);
-    console.log("BackendUpdateProblem", problemId, newProblem);
-    await backendUpdateProblem(problemId, newProblem);
-  }, [problemData]);
+    const updates = callback(problemData);
+    if (Object.keys(updates).length > 0) {
+      await backendUpdateProblem(problemId, updates);
+    }
+    const updatedProblem = await getProblem(problemId);
+    if (updatedProblem) {
+      setProblemData(updatedProblem);
+    }
+  }, [problemData, problemId]);
 
   useEffect(() => {
-    getProblem(problemId).then(setProblemData);
+    getProblem(problemId).then(problem => {
+      if (problem) {
+        setProblemData(problem);
+      }
+    });
   }, [problemId]);
 
   return (
@@ -184,11 +183,13 @@ function ViewProblemPage() {
         <ClientOnly>{() => <Menu />}</ClientOnly>
         
         <div className="p-6">
-          {problemData === null
-           ? (<div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-              </div>)
-           : <ProblemViewer problem={problemData} />}
+          {problemData === null ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            </div>
+          ) : (
+            <ProblemViewer problem={problemData} />
+          )}
         </div>
         {hasNutAdminKey() && problemData && (
           <UpdateProblemForms updateProblem={updateProblem} />
