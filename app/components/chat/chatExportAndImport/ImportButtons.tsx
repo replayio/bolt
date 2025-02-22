@@ -7,7 +7,11 @@ type ChatData = {
   description?: string; // Optional description
 };
 
-export function ImportButtons(importChat: ((description: string, messages: Message[]) => Promise<void>) | undefined) {
+interface ImportButtonsProps {
+  importChat: ((description: string, messages: Message[]) => Promise<void>) | undefined;
+}
+
+export function ImportButtons({ importChat }: ImportButtonsProps) {
   return (
     <div className="flex flex-col items-center justify-center w-auto">
       <input
